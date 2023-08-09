@@ -13,12 +13,12 @@ import (
 )
 
 func setWhiteBackground(imgSrc image.Image) image.Image {
-	newImg := image.NewRGBA(imgSrc.Bounds())
+	backgroundImg := image.NewRGBA(imgSrc.Bounds())
 
-	draw.Draw(newImg, newImg.Bounds(), &image.Uniform{color.White}, image.Point{}, draw.Src)
-	draw.Draw(newImg, newImg.Bounds(), imgSrc, imgSrc.Bounds().Min, draw.Over)
+	draw.Draw(backgroundImg, backgroundImg.Bounds(), &image.Uniform{color.White}, image.Point{}, draw.Src)
+	draw.Draw(backgroundImg, backgroundImg.Bounds(), imgSrc, imgSrc.Bounds().Min, draw.Over)
 
-	return newImg
+	return backgroundImg
 }
 
 func main() {
