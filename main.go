@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"encoding/base64"
 	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -23,10 +26,33 @@ func setWhiteBackground(imgSrc image.Image) image.Image {
 	return backgroundImg
 }
 
+func getBase64Image(filepath string) string {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Fatalf("Failed to open file in \"%v\": %v", filepath, err)
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		log.Fatalf("Failed to get file size: %v", err)
+	}
+
+	bs := make([]byte, stat.Size())
+
+	_, err = bufio.NewReader(file).Read(bs)
+	if err != nil && err != io.EOF {
+		log.Fatalf("Failed to read bite slice: %v", err)
+	}
+
+	mimeType := http.DetectContentType(bs)
+
+	base64Encoded := "data:"+mimeType+";base64,"+base64.StdEncoding.EncodeToString(bs)
+	return base64Encoded
+}
+
 func main() {
 	args := os.Args
-	
-	log.Fatal()
 
 	mapFormat := []string{"jpg","png","gif","tiff","bmp"}
 
@@ -67,9 +93,13 @@ func main() {
 			}
 
 			resizeOpts.Height = height
+		case "--base64":
+			fmt.Println(getBase64Image(args[1]))
+			return
 		default:
-			log.Fatal(`Invalid arguments.
-				Try: convertimg <file> [-o <output-filename>] [-f JPEG|PNG|BMP|GIF|TIFF] [-w <int>] [-h <int>]`)
+			log.Fatal("Invalid arguments.\n"+
+				"\tTry: convertimg <file> [-o <output-filename>] [-f JPEG|PNG|BMP|GIF|TIFF] [-w <int>] [-h <int>]\n"+
+				"\t     convertimg <file> --base64")
 		}
 	}
 
