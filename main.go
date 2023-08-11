@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/sunshineplan/imgconv"
 )
@@ -23,8 +25,12 @@ func setWhiteBackground(imgSrc image.Image) image.Image {
 
 func main() {
 	args := os.Args
+	
+	log.Fatal()
 
-	output := args[1]+"-copy"
+	mapFormat := []string{"jpg","png","gif","tiff","bmp"}
+
+	var output string	
 	format := imgconv.JPEG
 	resizeOpts := imgconv.ResizeOption{}
 
@@ -83,6 +89,12 @@ func main() {
 	err = imgconv.Write(io.Discard, imgSrc, &imgconv.FormatOption{Format: format})
 	if err != nil {
 		log.Fatalf("Failed to write image: %v", err)
+	}
+
+	if output == "" {
+		arrString := strings.Split(args[1],".")
+		file := strings.Join(arrString[:len(arrString)-1],".")
+		output = fmt.Sprintf("%v.%v",file,mapFormat[format])
 	}
 
 	err = imgconv.Save(output, imgSrc, &imgconv.FormatOption{Format: format})
